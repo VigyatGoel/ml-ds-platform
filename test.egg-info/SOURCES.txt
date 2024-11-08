@@ -1,0 +1,11 @@
+setup.py
+src/__init__.py
+src/DataScience/__init__.py
+src/DataScience/Plots/__init__.py
+src/DataScience/Plots/plots.py
+src/DataScience/UI/__init__.py
+src/DataScience/UI/frontend.py
+test.egg-info/PKG-INFO
+test.egg-info/SOURCES.txt
+test.egg-info/dependency_links.txt
+test.egg-info/top_level.txt
