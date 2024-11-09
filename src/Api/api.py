@@ -1,8 +1,19 @@
+import json
+
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from ..DataScience.Plots.plots import Plot
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
@@ -24,4 +35,4 @@ async def scatter_plot():
     scatter_plot_data = plot.get_scatter_plot_data(csv_file, feature1, feature2)
     print(scatter_plot_data)
 
-    return scatter_plot_data.to_json(orient='records')
+    return json.loads(scatter_plot_data.to_json(orient='records'))
