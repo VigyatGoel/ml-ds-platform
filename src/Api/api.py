@@ -9,7 +9,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,11 +27,11 @@ async def read_root():
 @app.get("/plot")
 async def scatter_plot():
     plot = Plot()
-    #
+
     csv_file = "/Users/vigyatgoel/Desktop/Personal_Projects/MachineLearning_Platform/Machine_learning_platform/src/DataScience/Plots/Salary_dataset.csv"
     feature1 = "YearsExperience"
     feature2 = "Salary"
-    #
+
     scatter_plot_data = plot.get_scatter_plot_data(csv_file, feature1, feature2)
     print(scatter_plot_data)
 

@@ -42,7 +42,7 @@ class Plot:
 
     @staticmethod
     def _single_box_plot(df, feature1):
-        return df
+        return df[feature1]
 
     def get_boxplot_data(self, csv_file, feature1):
         df = self._read_csv(csv_file)
