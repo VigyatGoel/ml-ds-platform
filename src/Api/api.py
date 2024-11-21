@@ -1,6 +1,6 @@
-import json
+import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from ..DataScience.Plots.plots import Plot
@@ -24,15 +24,49 @@ async def read_root():
     }
 
 
-@app.get("/plot")
-async def scatter_plot():
-    plot = Plot()
+@app.get("/scatter_plot")
+async def scatter_plot(
+        csv_file: str = Query(..., description="Path to the CSV file"),
+        feature1: str = Query(..., description="First feature for scatter plot"),
+        feature2: str = Query(..., description="Second feature for scatter plot"),
+):
+    try:
+        if not os.path.exists(csv_file):
+            raise HTTPException(status_code=404, detail=f"CSV file not found: {csv_file}")
 
-    csv_file = "/Users/vigyatgoel/Desktop/Personal_Projects/MachineLearning_Platform/Machine_learning_platform/src/DataScience/Plots/Salary_dataset.csv"
-    feature1 = "YearsExperience"
-    feature2 = "Salary"
+        plot = Plot()
+        scatter_plot_data = plot.get_scatter_plot_data(csv_file, feature1=feature1, feature2=feature2)
 
-    scatter_plot_data = plot.get_scatter_plot_data(csv_file, feature1, feature2)
-    print(scatter_plot_data)
+        rounded_data = scatter_plot_data.round(2)
 
-    return json.loads(scatter_plot_data.to_json(orient='records'))
+        return rounded_data.to_dict(orient="list")
+
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except KeyError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid feature(s): {e}")
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/histogram_plot")
+async def histogram_plot(
+        csv_file: str = Query(..., description="Path to the CSV file")
+):
+    try:
+        if not os.path.exists(csv_file):
+            raise HTTPException(status_code=404, detail=f"CSV file not found: {csv_file}")
+
+        plot = Plot()
+        histogram_plot_data = plot.get_histogram_plot_data(csv_file)
+        rounded_data = histogram_plot_data.round(2)
+        return rounded_data.to_dict(orient="list")
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
