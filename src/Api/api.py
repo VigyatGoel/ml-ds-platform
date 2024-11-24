@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 from ..DataScience.Plots.plots import Plot
@@ -22,6 +22,21 @@ async def read_root():
         "program_name": "ML Platform",
         "version": "0.1"
     }
+
+
+@app.post("/upload_csv")
+async def upload_csv(file: UploadFile = File(...)):
+    try:
+        file_location = f"../CsvFiles/{file.filename}"
+        with open(file_location, "wb") as f:
+            f.write(await file.read())
+
+        return {
+            "message": f"File '{file.filename}' uploaded successfully",
+            "file_path": file_location
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
 
 
 @app.get("/scatter_plot")
@@ -69,4 +84,3 @@ async def histogram_plot(
         raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
