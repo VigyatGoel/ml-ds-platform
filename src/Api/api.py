@@ -31,9 +31,13 @@ async def upload_csv(file: UploadFile = File(...)):
         with open(file_location, "wb") as f:
             f.write(await file.read())
 
+        absolute_file_path = os.path.abspath(file_location)
+
+
         return {
             "message": f"File '{file.filename}' uploaded successfully",
-            "file_path": file_location
+            "file_path": file_location,
+            "absolute_file_path": absolute_file_path
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
