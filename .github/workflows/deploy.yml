@@ -40,7 +40,9 @@ jobs:
       
     - name: Post-deployment health check
       run: |
+        echo "Performing health check at: http://${{ secrets.VM_IP }}/health"
         STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.VM_IP }}/health)
+        echo "HTTP status code: $STATUS"
         if [ "$STATUS" -ne 200 ]; then
           echo "Health check failed with status: $STATUS"
           exit 1
