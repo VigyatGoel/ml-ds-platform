@@ -1,0 +1,39 @@
+name: Deploy FastAPI App
+
+on:
+  push:
+    branches:
+      - main  # Trigger workflow on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up SSH for deployment
+    - name: Install SSH agent and add private key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    # Step 3: Add known hosts (your VM's IP)
+    - name: Add known hosts
+      run: |
+        echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+
+    # Step 4: Deploy code to the VM
+    - name: Deploy application
+      run: |
+        ssh ubuntu@140.238.255.45 << EOF
+          cd /home/ubuntu/Machine-Learning-and-Data-Science-Platform
+          git pull origin main
+          source /home/ubuntu/miniforge3/bin/activate test  # Activate conda env
+          pip install -r requirements.txt  # Install dependencies
+          sudo supervisorctl reread
+          sudo supervisorctl update
+          sudo supervisorctl reload # Reload Supervisor to apply changes
+        EOF
