@@ -20,7 +20,14 @@ app.add_middleware(
 async def read_root():
     return {
         "program_name": "ML Platform",
-        "version": "0.1"
+        "version": "1.0"
+    }
+
+
+@app.get("/help")
+async def help():
+    return {
+        "message": "API is working properly!"
     }
 
 
@@ -32,7 +39,6 @@ async def upload_csv(file: UploadFile = File(...)):
             f.write(await file.read())
 
         absolute_file_path = os.path.abspath(file_location)
-
 
         return {
             "message": f"File '{file.filename}' uploaded successfully",
