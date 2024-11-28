@@ -24,6 +24,14 @@ async def read_root():
     }
 
 
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "message": "API is running successfully",
+    }
+
+
 @app.get("/help")
 async def help():
     return {
