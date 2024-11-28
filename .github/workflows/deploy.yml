@@ -38,29 +38,15 @@ jobs:
           sudo supervisorctl reload
         EOF
       
-    - name: Post-deployment health check
+    - name: Perform Health Check
       run: |
-        echo "Attempting to reach: http://${{ secrets.VM_IP }}/health"
-
-        # Check network connectivity first
-        if ! ping -c 4 ${{ secrets.VM_IP }}; then
-          echo "Unable to ping the server"
-          exit 1
-        fi
-
-        # Try curl with more verbose output
-        RESPONSE=$(curl -v --max-time 10 http://${{ secrets.VM_IP }}/health 2>&1)
-        STATUS=$(echo "$RESPONSE" | grep "HTTP/" | awk '{print $2}')
-
-        echo "Full curl output:"
-        echo "$RESPONSE"
-
-        echo "Detected HTTP Status: $STATUS"
-
-        if [ -z "$STATUS" ] || [ "$STATUS" -ne 200 ]; then
-          echo "Health check failed"
-          exit 1
-        fi
-
-        echo "Health check passed"
-      timeout-minutes: 2
+        set -x
+        import requests
+        resp = requests.get("http://${{ secrets.VM_IP }}/health")
+        if resp.status_code != 200:
+          print(f"Health check failed with status code: {resp.status_code}")
+          print(resp.text)
+          exit(1)
+        else:
+          print("Health check passed")
+      shell: python
