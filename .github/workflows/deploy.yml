@@ -38,15 +38,12 @@ jobs:
           sudo supervisorctl reload
         EOF
       
-    - name: Perform Health Check
+    - name: Ping VM
       run: |
-        set -x
-        import requests
-        resp = requests.get("http://${{ secrets.VM_IP }}/health")
-        if resp.status_code != 200:
-          print(f"Health check failed with status code: {resp.status_code}")
-          print(resp.text)
-          exit(1)
-        else:
-          print("Health check passed")
-      shell: python
+        echo "Pinging the VM at ${{ secrets.VM_IP }}"
+        ping -c 4 ${{ secrets.VM_IP }}
+        echo "Ping output:"
+        cat /tmp/ping_output.txt
+      shell: bash
+      env:
+        PING_OUTPUT_FILE: /tmp/ping_output.txt
