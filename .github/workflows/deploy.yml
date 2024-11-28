@@ -40,20 +40,27 @@ jobs:
       
     - name: Post-deployment health check
       run: |
-        echo "Performing health check at: http://${{ secrets.VM_IP }}/health"
-        RESPONSE=$(curl -v -s -o /tmp/health_check_response http://${{ secrets.VM_IP }}/health 2>&1)
-        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.VM_IP }}/health)
+        echo "Attempting to reach: http://${{ secrets.VM_IP }}/health"
+
+        # Check network connectivity first
+        if ! ping -c 4 ${{ secrets.VM_IP }}; then
+          echo "Unable to ping the server"
+          exit 1
+        fi
+
+        # Try curl with more verbose output
+        RESPONSE=$(curl -v --max-time 10 http://${{ secrets.VM_IP }}/health 2>&1)
+        STATUS=$(echo "$RESPONSE" | grep "HTTP/" | awk '{print $2}')
 
         echo "Full curl output:"
         echo "$RESPONSE"
 
-        echo "HTTP status code: $STATUS"
+        echo "Detected HTTP Status: $STATUS"
 
-        if [ "$STATUS" -ne 200 ]; then
-          echo "Health check failed with status: $STATUS"
-          echo "Response body:"
-          cat /tmp/health_check_response
+        if [ -z "$STATUS" ] || [ "$STATUS" -ne 200 ]; then
+          echo "Health check failed"
           exit 1
         fi
-        echo "Health check passed with status: $STATUS"
+
+        echo "Health check passed"
       timeout-minutes: 2
