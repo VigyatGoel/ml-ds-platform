@@ -41,10 +41,19 @@ jobs:
     - name: Post-deployment health check
       run: |
         echo "Performing health check at: http://${{ secrets.VM_IP }}/health"
+        RESPONSE=$(curl -v -s -o /tmp/health_check_response http://${{ secrets.VM_IP }}/health 2>&1)
         STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://${{ secrets.VM_IP }}/health)
+
+        echo "Full curl output:"
+        echo "$RESPONSE"
+
         echo "HTTP status code: $STATUS"
+
         if [ "$STATUS" -ne 200 ]; then
           echo "Health check failed with status: $STATUS"
+          echo "Response body:"
+          cat /tmp/health_check_response
           exit 1
         fi
         echo "Health check passed with status: $STATUS"
+      timeout-minutes: 2
