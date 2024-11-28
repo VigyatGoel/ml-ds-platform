@@ -1,7 +1,9 @@
 import os
 
+import pandas as pd
 from fastapi import FastAPI, Query, HTTPException, File, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from ..DataScience.Plots.plots import Plot
 
@@ -22,6 +24,26 @@ async def read_root():
         "program_name": "ML Platform",
         "version": "1.0"
     }
+
+
+@app.get("/extract_features")
+async def extract_csv_features(
+        csv_file: str = Query(..., description="Path to the CSV file")
+):
+    try:
+        if not os.path.exists(csv_file):
+            raise HTTPException(status_code=404, detail=f"CSV file not found: {csv_file}")
+
+        df = pd.read_csv(csv_file)
+
+        label_column = df.columns[-1]  # Last column is the label
+
+        # Extract the names of the feature columns (all except the label column)
+        feature_columns = df.columns[:-1].tolist()  # All columns except the last one
+
+        return JSONResponse(content={"feature_columns": feature_columns, "label_column": label_column})
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @app.get("/health", status_code=status.HTTP_200_OK)
