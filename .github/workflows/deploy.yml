@@ -40,8 +40,8 @@ jobs:
       
     - name: Ping VM
       run: |
-        echo "Pinging the VM at ${{ secrets.VM_IP }}"
-        ping -c 4 ${{ secrets.VM_IP }}
+        echo "Pinging the VM at 140.238.255.45"
+        ping -c 4 140.238.255.45
         echo "Ping output:"
         cat /tmp/ping_output.txt
       shell: bash
