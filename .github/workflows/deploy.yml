@@ -37,13 +37,3 @@ jobs:
           sudo supervisorctl update
           sudo supervisorctl reload
         EOF
-      
-    - name: Ping VM
-      run: |
-        echo "Pinging the VM at 140.238.255.45"
-        ping -c 4 google.com
-        echo "Ping output:"
-        cat /tmp/ping_output.txt
-      shell: bash
-      env:
-        PING_OUTPUT_FILE: /tmp/ping_output.txt
