@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI, Query, HTTPException, File, UploadFile
+from fastapi import FastAPI, Query, HTTPException, File, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from ..DataScience.Plots.plots import Plot
@@ -24,7 +24,7 @@ async def read_root():
     }
 
 
-@app.get("/health")
+@app.get("/health", status_code=status.HTTP_200_OK)
 async def health_check():
     return {
         "status": "healthy",
@@ -32,14 +32,14 @@ async def health_check():
     }
 
 
-@app.get("/help")
+@app.get("/help", status_code=status.HTTP_200_OK)
 async def help():
     return {
         "message": "API is working properly!"
     }
 
 
-@app.post("/upload_csv")
+@app.post("/upload_csv", status_code=status.HTTP_200_OK)
 async def upload_csv(file: UploadFile = File(...)):
     try:
         file_location = f"../CsvFiles/{file.filename}"
@@ -57,7 +57,7 @@ async def upload_csv(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
 
 
-@app.get("/scatter_plot")
+@app.get("/scatter_plot", status_code=status.HTTP_200_OK)
 async def scatter_plot(
         csv_file: str = Query(..., description="Path to the CSV file"),
         feature1: str = Query(..., description="First feature for scatter plot"),
@@ -84,7 +84,7 @@ async def scatter_plot(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/histogram_plot")
+@app.get("/histogram_plot", status_code=status.HTTP_200_OK)
 async def histogram_plot(
         csv_file: str = Query(..., description="Path to the CSV file")
 ):
