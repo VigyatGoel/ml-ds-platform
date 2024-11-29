@@ -30,6 +30,7 @@ jobs:
       run: |
         ssh ubuntu@${{ secrets.VM_IP }} << EOF
           cd /home/ubuntu/Machine-Learning-and-Data-Science-Platform
+          git reset --hard
           git pull origin main
           source /home/ubuntu/miniforge3/bin/activate test
           pip install -r requirements.txt
