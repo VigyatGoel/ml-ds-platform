@@ -7,6 +7,14 @@ src/Api/api.py
 src/DataScience/__init__.py
 src/DataScience/Plots/__init__.py
 src/DataScience/Plots/plots.py
+src/api/__init__.py
+src/api/api.py
+src/datascience/__init__.py
+src/datascience/plots/__init__.py
+src/datascience/plots/plots.py
+src/service/__init__.py
+src/service/datascience/__init__.py
+src/service/datascience/ds_service.py
 test.egg-info/PKG-INFO
 test.egg-info/SOURCES.txt
 test.egg-info/dependency_links.txt

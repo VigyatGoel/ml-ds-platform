@@ -31,6 +31,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="/src/csvfiles/iris.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="/src/datascience/plots/Salary_dataset.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
       </map>
     </option>
   </component>
