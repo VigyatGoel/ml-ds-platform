@@ -72,3 +72,24 @@ async def histogram_plot(
     service = DsService()
     histogram_plot_data = service.get_histogram_plot_data_service(csv_file)
     return histogram_plot_data
+
+
+@app.get("/line_plot", status_code=status.HTTP_200_OK)
+async def line_plot(
+        csv_file: str = Query(..., description="Path to the CSV file"),
+        feature1: str = Query(..., description="First feature for scatter plot")
+):
+    service = DsService()
+    line_plot_data = service.get_line_plot_data_service(csv_file, feature1)
+    return line_plot_data
+
+
+@app.get("/correlation_matrix", status_code=status.HTTP_200_OK)
+async def correlation_matrix(
+        csv_file: str = Query(..., description="Path to the CSV file")
+):
+    service = DsService()
+    correlation_matrix_data = service.get_correlation_matrix_data_service(csv_file)
+    return correlation_matrix_data
+
+

@@ -34,7 +34,8 @@ class Plot:
 
     @staticmethod
     def _correlation_matrix(df):
-        return df.corr()
+        numeric_df = df.select_dtypes(include=["number"])
+        return numeric_df.corr()
 
     def get_correlation_matrix_data(self, csv_file):
         df = self._read_csv(csv_file)
@@ -66,13 +67,14 @@ class Plot:
 
 
 if __name__ == '__main__':
-    plot = Plot()
+    pass
+    # plot = Plot()
+    # #
+    # csv_file = "Salary_dataset.csv"
+    # # feature1 = "Y"
+    # # feature2 = "sepal_width"
+    # #
+    # scatter_plot_data = plot.get_boxplot_data(csv_file)
+    # print(scatter_plot_data)
     #
-    csv_file = "Salary_dataset.csv"
-    # feature1 = "Y"
-    # feature2 = "sepal_width"
-    #
-    scatter_plot_data = plot.get_boxplot_data(csv_file)
-    print(scatter_plot_data)
-
-    print(scatter_plot_data.to_json(orient='records'))
+    # print(scatter_plot_data.to_json(orient='records'))
