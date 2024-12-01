@@ -2,7 +2,6 @@ import pandas as pd
 
 
 class Plot:
-
     @staticmethod
     def _read_csv(csv_file):
         df = pd.read_csv(csv_file)
@@ -45,13 +44,14 @@ class Plot:
     def _single_box_plot(df, feature1):
         return df[feature1]
 
-    def get_boxplot_data(self, csv_file, feature1):
+    def get_box_plot_data(self, csv_file, feature1):
         df = self._read_csv(csv_file)
         return self._single_box_plot(df, feature1)
 
     @staticmethod
     def _pair_plot(df):
-        return df
+        numerical_df = df.select_dtypes(include=["number"])
+        return numerical_df
 
     def get_pair_plot_data(self, csv_file):
         df = self._read_csv(csv_file)
