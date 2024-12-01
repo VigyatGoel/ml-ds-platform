@@ -64,17 +64,3 @@ class Plot:
     def get_area_plot_data(self, csv_file, feature1):
         df = self._read_csv(csv_file)
         return self._area_plot(df, feature1)
-
-
-if __name__ == '__main__':
-    pass
-    # plot = Plot()
-    # #
-    # csv_file = "Salary_dataset.csv"
-    # # feature1 = "Y"
-    # # feature2 = "sepal_width"
-    # #
-    # scatter_plot_data = plot.get_boxplot_data(csv_file)
-    # print(scatter_plot_data)
-    #
-    # print(scatter_plot_data.to_json(orient='records'))

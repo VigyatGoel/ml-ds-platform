@@ -2,3 +2,5 @@ pandas
 numpy
 matplotlib
 fastapi[standard]
+fastapi-cache2
+redis
