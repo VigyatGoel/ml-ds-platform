@@ -1,37 +1,42 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import RateLimiter
 from redis import asyncio as aioredis
 
 from .endpoints import data_science, csv_file
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    redis_client = None  # Initialize to None
+async def lifespan(_: FastAPI):
+    redis_client = None
     try:
-        # Create Redis client
         redis_client = aioredis.from_url("redis://localhost:6379")
-        # Initialize caching
         FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
         print("Cache initialized successfully.")
-        yield  # Application is running
+
+        await FastAPILimiter.init(redis_client)
+        print("Limiter initialized successfully.")
+
+        yield
     except Exception as e:
         print(f"Error setting up Redis caching: {e}")
-        yield  # Ensure application still runs even on error
+        yield
     finally:
         try:
-            # Clear cache during shutdown
             if FastAPICache.get_backend():
                 await FastAPICache.clear()
                 print("Cache cleared during shutdown.")
+                await FastAPILimiter.close()
+                print("Limiter cleared during shutdown.")
         except Exception as e:
             print(f"Error clearing cache: {e}")
         finally:
-            if redis_client:  # Check if Redis client was initialized
+            if redis_client:
                 await redis_client.close()
                 print("Redis connection closed.")
 
@@ -50,7 +55,7 @@ app.include_router(data_science.router, prefix="/data_science", tags=["Data Scie
 app.include_router(csv_file.router, prefix="/csv_file", tags=["CSV File"])
 
 
-@app.get("/")
+@app.get("/", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=50, seconds=60))])
 async def read_root():
     return {
         "program_name": "ML Platform",
@@ -58,7 +63,7 @@ async def read_root():
     }
 
 
-@app.get("/health", status_code=status.HTTP_200_OK)
+@app.get("/health", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=50, seconds=60))])
 async def health_check():
     return {
         "status": "healthy",
@@ -66,7 +71,7 @@ async def health_check():
     }
 
 
-@app.get("/help", status_code=status.HTTP_200_OK)
+@app.get("/help", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=50, seconds=60))])
 async def help():
     return {
         "message": "API is working properly!"

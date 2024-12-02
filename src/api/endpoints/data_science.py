@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from fastapi import Query, status
 from fastapi.params import Depends
 from fastapi_cache.decorator import cache
+from fastapi_limiter.depends import RateLimiter
 
 from ...service.datascience.ds_service import DsService
 
@@ -21,8 +22,8 @@ def common_feature2(feature2: str = Query(..., description="Second feature for t
     return feature2
 
 
-@router.get("/scatter_plot", status_code=status.HTTP_200_OK)
-@cache(expire=1800)  # Cache for 30 minutes
+@router.get("/scatter_plot", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=10, seconds=60))])
+@cache(expire=1800)
 async def scatter_plot(
         csv_file: str = Depends(common_csv_file),
         feature1: str = Depends(common_feature1),
@@ -32,8 +33,9 @@ async def scatter_plot(
     return scatter_plot_data
 
 
-@router.get("/histogram_plot", status_code=status.HTTP_200_OK)
-@cache(expire=1800)  # Cache for 30 minutes
+@router.get("/histogram_plot", status_code=status.HTTP_200_OK,
+            dependencies=[Depends(RateLimiter(times=10, seconds=60))])
+@cache(expire=1800)
 async def histogram_plot(
         csv_file: str = Depends(common_csv_file)
 ):
@@ -41,8 +43,8 @@ async def histogram_plot(
     return histogram_plot_data
 
 
-@router.get("/line_plot", status_code=status.HTTP_200_OK)
-@cache(expire=1800)  # Cache for 30 minutes
+@router.get("/line_plot", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=10, seconds=60))])
+@cache(expire=1800)
 async def line_plot(
         csv_file: str = Depends(common_csv_file),
         feature1: str = Depends(common_feature1),
@@ -51,7 +53,8 @@ async def line_plot(
     return line_plot_data
 
 
-@router.get("/correlation_matrix", status_code=status.HTTP_200_OK)
+@router.get("/correlation_matrix", status_code=status.HTTP_200_OK,
+            dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 @cache(expire=1800)
 async def correlation_matrix(
         csv_file: str = Depends(common_csv_file)
@@ -60,7 +63,7 @@ async def correlation_matrix(
     return correlation_matrix_data
 
 
-@router.get("/box_plot", status_code=status.HTTP_200_OK)
+@router.get("/box_plot", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 @cache(expire=1800)
 async def box_plot(
         csv_file: str = Depends(common_csv_file),
@@ -70,7 +73,7 @@ async def box_plot(
     return box_plot_data
 
 
-@router.get("/pair_plot", status_code=status.HTTP_200_OK)
+@router.get("/pair_plot", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 @cache(expire=1800)
 async def pair_plot(
         csv_file: str = Depends(common_csv_file)
@@ -79,7 +82,7 @@ async def pair_plot(
     return pair_plot_data
 
 
-@router.get("/area_plot", status_code=status.HTTP_200_OK)
+@router.get("/area_plot", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 @cache(expire=1800)
 async def area_plot(
         csv_file: str = Depends(common_csv_file),
