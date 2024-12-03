@@ -17,6 +17,6 @@ async def extract_csv_features(
     return csv_service.extract_features_from_csv(csv_file)
 
 
-@router.post("/upload_csv", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=5, seconds=60))])
+@router.post("/upload_csv", status_code=status.HTTP_200_OK)
 async def upload_csv(file: UploadFile = File(...)):
     return await csv_service.upload_csv_file_service(file)
