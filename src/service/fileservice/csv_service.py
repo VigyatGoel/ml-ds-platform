@@ -13,7 +13,13 @@ class CsvService:
         Handles the logic for uploading a CSV file and saving it locally.
         """
         try:
-            file_location = f"../csvfiles/{file.filename}"
+
+            directory = "../csvfiles"
+            os.makedirs(directory, exist_ok=True)
+
+            # Construct the file location
+            file_location = os.path.join(directory, file.filename)
+
             with open(file_location, "wb") as f:
                 f.write(await file.read())
 
