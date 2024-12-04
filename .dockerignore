@@ -1,0 +1,9 @@
+# Exclude unnecessary files and directories
+.git
+.github
+*.egg-info
+*.pyc
+__pycache__/
+README.md
+Dockerfile
+docker-compose.yml

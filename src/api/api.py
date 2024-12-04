@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, status, Depends
@@ -10,12 +11,16 @@ from redis import asyncio as aioredis
 
 from .endpoints import data_science, csv_file
 
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     redis_client = None
     try:
-        redis_client = aioredis.from_url("redis://localhost:6379")
+        redis_url = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+        redis_client = aioredis.from_url(redis_url)
         FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
         print("Cache initialized successfully.")
 

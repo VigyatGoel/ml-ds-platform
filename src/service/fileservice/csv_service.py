@@ -9,15 +9,11 @@ class CsvService:
 
     @staticmethod
     async def upload_csv_file_service(file: UploadFile) -> dict:
-        """
-        Handles the logic for uploading a CSV file and saving it locally.
-        """
         try:
 
-            directory = "../csvfiles"
+            directory = os.path.join(os.path.dirname(__file__), "../../csvfiles")
             os.makedirs(directory, exist_ok=True)
 
-            # Construct the file location
             file_location = os.path.join(directory, file.filename)
 
             with open(file_location, "wb") as f:
@@ -27,7 +23,6 @@ class CsvService:
 
             return {
                 "message": f"File '{file.filename}' uploaded successfully",
-                "file_path": file_location,
                 "absolute_file_path": absolute_file_path
             }
         except Exception as e:
