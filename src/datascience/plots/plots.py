@@ -17,19 +17,21 @@ class Plot:
 
     @staticmethod
     def _histogram_plot(df):
-        return df
+        numeric_df = df.select_dtypes(include=["number"])
+        return numeric_df
 
     def get_histogram_plot_data(self, csv_file):
         df = self._read_csv(csv_file)
         return self._histogram_plot(df)
 
     @staticmethod
-    def _line_plot(df, feature1):
-        return df[feature1]
+    def _line_plot(df):
+        numeric_df = df.select_dtypes(include=["number"])
+        return numeric_df
 
-    def get_line_plot_data(self, csv_file, feature1):
+    def get_line_plot_data(self, csv_file):
         df = self._read_csv(csv_file)
-        return self._line_plot(df, feature1)
+        return self._line_plot(df)
 
     @staticmethod
     def _correlation_matrix(df):

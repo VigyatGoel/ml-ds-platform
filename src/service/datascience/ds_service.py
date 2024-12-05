@@ -54,22 +54,15 @@ class DsService:
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    def get_line_plot_data_service(self, csv_file, feature1):
+    def get_line_plot_data_service(self, csv_file):
         try:
             if not os.path.exists(csv_file):
                 raise HTTPException(status_code=404, detail=f"CSV file not found: {csv_file}")
 
-            if not feature1:
-                raise HTTPException(status_code=400, detail="a feature must be specified")
-
-            line_plot_data = self.plot.get_line_plot_data(csv_file, feature1=feature1)
+            line_plot_data = self.plot.get_line_plot_data(csv_file)
             rounded_data = line_plot_data.round(2).reset_index(drop=True)
 
-            response_data = {
-                feature1: rounded_data.tolist()
-            }
-
-            return response_data
+            return rounded_data.to_dict(orient="list")
 
         except FileNotFoundError as e:
             raise HTTPException(status_code=404, detail=str(e))

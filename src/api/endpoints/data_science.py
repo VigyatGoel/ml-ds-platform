@@ -46,10 +46,9 @@ async def histogram_plot(
 @router.get("/line_plot", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 @cache(expire=1800)
 async def line_plot(
-        csv_file: str = Depends(common_csv_file),
-        feature1: str = Depends(common_feature1),
+        csv_file: str = Depends(common_csv_file)
 ):
-    line_plot_data = service.get_line_plot_data_service(csv_file, feature1)
+    line_plot_data = service.get_line_plot_data_service(csv_file)
     return line_plot_data
 
 
