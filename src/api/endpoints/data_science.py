@@ -33,7 +33,8 @@ async def scatter_plot(
     return scatter_plot_data
 
 
-@router.get("/histogram_plot", status_code=status.HTTP_200_OK)
+@router.get("/histogram_plot", status_code=status.HTTP_200_OK,
+            dependencies=[Depends(RateLimiter(times=10, seconds=60))])
 @cache(expire=1800)
 async def histogram_plot(
         csv_file: str = Depends(common_csv_file)
