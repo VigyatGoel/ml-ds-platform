@@ -38,7 +38,6 @@ class CsvService:
 
             label_column = df.columns[-1]  # Last column is the label
 
-            # Extract the names of the feature columns (all except the label column)
             feature_columns = df.columns[:-1].tolist()  # All columns except the last one
 
             return JSONResponse(content={"feature_columns": feature_columns, "label_column": label_column})

@@ -7,3 +7,9 @@ __pycache__/
 README.md
 Dockerfile
 docker-compose.yml
+__pycache__
+*.pyo
+*.env
+.DS_Store
+.idea
+.idea/
