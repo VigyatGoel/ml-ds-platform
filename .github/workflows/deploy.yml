@@ -33,9 +33,8 @@ jobs:
           git fetch origin
           git reset --hard origin/main
           git pull origin main
-          source /home/ubuntu/miniforge3/bin/activate test
-          pip install -r requirements.txt
-          sudo supervisorctl reread
-          sudo supervisorctl update
-          sudo supervisorctl reload
+          sudo docker build -t vigyaan-image:latest .
+          sudo docker stop vigyaan-container || true
+          sudo docker rm vigyaan-container || true
+          sudo docker run -d --name vigyaan-container -p 8000:8000 vigyaan-image:latest
         EOF
