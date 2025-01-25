@@ -1,7 +1,6 @@
-pandas
 numpy
+pandas
 matplotlib
 fastapi[standard]
-fastapi-cache2
-redis
-fastapi-limiter
+scikit-learn
+slowapi

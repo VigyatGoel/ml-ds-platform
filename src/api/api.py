@@ -1,52 +1,17 @@
-import os
-from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, status, Depends
+from fastapi import FastAPI, status, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
-from fastapi_limiter import FastAPILimiter
-from fastapi_limiter.depends import RateLimiter
-from redis import asyncio as aioredis
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
-from .endpoints import data_science, csv_file
+from .endpoints import data_science, csv_file, machine_learning
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+app = FastAPI()
+limiter = Limiter(key_func=get_remote_address)
 
+app.state.limiter = limiter
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    redis_client = None
-    try:
-        redis_url = f"redis://{REDIS_HOST}:{REDIS_PORT}"
-        redis_client = aioredis.from_url(redis_url)
-        FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
-        print("Cache initialized successfully.")
-
-        await FastAPILimiter.init(redis_client)
-        print("Limiter initialized successfully.")
-
-        yield
-    except Exception as e:
-        print(f"Error setting up Redis caching: {e}")
-        yield
-    finally:
-        try:
-            if FastAPICache.get_backend():
-                await FastAPICache.clear()
-                print("Cache cleared during shutdown.")
-                await FastAPILimiter.close()
-                print("Limiter cleared during shutdown.")
-        except Exception as e:
-            print(f"Error clearing cache: {e}")
-        finally:
-            if redis_client:
-                await redis_client.close()
-                print("Redis connection closed.")
-
-
-app = FastAPI(lifespan=lifespan)
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,26 +23,30 @@ app.add_middleware(
 
 app.include_router(data_science.router, prefix="/data_science", tags=["Data Science"])
 app.include_router(csv_file.router, prefix="/csv_file", tags=["CSV File"])
+app.include_router(machine_learning.router, prefix="/machine_learning", tags=["Machine Learning"])
 
 
-@app.get("/", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=50, seconds=60))])
-async def read_root():
+@app.get("/", status_code=status.HTTP_200_OK)
+@limiter.limit("20/minute")
+async def read_root(request: Request):
     return {
         "program_name": "ML Platform",
         "version": "1.0"
     }
 
 
-@app.get("/health", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=50, seconds=60))])
-async def health_check():
+@app.get("/health", status_code=status.HTTP_200_OK)
+@limiter.limit("20/minute")
+async def health_check(request: Request):
     return {
         "status": "healthy",
         "message": "API is running successfully",
     }
 
 
-@app.get("/help", status_code=status.HTTP_200_OK, dependencies=[Depends(RateLimiter(times=50, seconds=60))])
-async def help():
+@app.get("/help", status_code=status.HTTP_200_OK)
+@limiter.limit("20/minute")
+async def help(request: Request):
     return {
         "message": "API is working properly!"
     }
