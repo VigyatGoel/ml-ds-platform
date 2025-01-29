@@ -36,5 +36,6 @@ jobs:
           sudo docker build -t vigyaan-image:latest .
           sudo docker stop vigyaan-container || true
           sudo docker rm vigyaan-container || true
-          sudo docker run -d --name vigyaan-container -p 8000:8000 vigyaan-image:latest
+          sudo docker run -d --name vigyaan-container -p 8000:8000 --restart unless-stopped vigyaan-image:latest
+          sudo docker rmi $(sudo docker images -f "dangling=true" -q)
         EOF
