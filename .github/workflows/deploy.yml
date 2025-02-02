@@ -37,4 +37,5 @@ jobs:
           sudo docker stop vigyaan-container || true
           sudo docker rm vigyaan-container || true
           sudo docker run -d --name vigyaan-container -p 8000:8000 --restart unless-stopped vigyaan-image:latest
+          sudo docker image prune -f
         EOF
