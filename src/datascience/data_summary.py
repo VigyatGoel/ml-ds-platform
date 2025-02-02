@@ -51,7 +51,8 @@ class DataSummary:
     @staticmethod
     def _get_categorical_columns_count(df):
         categorical_cols = df.select_dtypes(include=["object", "category"])
-        return categorical_cols.apply(pd.Series.value_counts)
+        result = categorical_cols.apply(pd.Series.value_counts)
+        return result.fillna("none")
 
     async def get_categorical_columns_count(self):
         return await self.execute_parallel(self._get_categorical_columns_count, await self.get_df())
@@ -67,3 +68,14 @@ class DataSummary:
         missing_values = df.isnull().sum()
         missing_percentage = (missing_values / len(df)) * 100
         return missing_values, missing_percentage
+
+
+async def main():
+    file = "/Users/vigyatgoel/Desktop/Personal_Projects/MachineLearning_Platform/Machine_learning_platform/src/datascience/placement.csv"
+    service = DataSummary(file)
+    result = await service.get_categorical_columns_count()
+    print(result)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
