@@ -11,8 +11,8 @@ WORKDIR /app
 
 COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install --prefix=/install --no-cache-dir -r /app/requirements.txt
-
+RUN pip install --upgrade pip && \
+    pip install --prefix=/install --no-cache-dir -r /app/requirements.txt
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

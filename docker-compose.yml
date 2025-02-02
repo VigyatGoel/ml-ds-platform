@@ -1,0 +1,9 @@
+services:
+  fastapi:
+    container_name: vigyaan-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vigyaan-image
+    ports:
+      - "8000:8000"
