@@ -1,14 +1,10 @@
-from fastapi import APIRouter
-from fastapi import Query, status, Request
-from fastapi.params import Depends
+from fastapi import APIRouter, Query, HTTPException, status, Request, Depends
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
-from ...service.datascience.ds_service import DsService
+from ...service.datascience.plot_service import PlotService
 
 router = APIRouter()
-service = DsService()
-
 limiter = Limiter(key_func=get_remote_address)
 
 
@@ -24,6 +20,15 @@ def common_feature2(feature2: str = Query(..., description="Second feature for t
     return feature2
 
 
+async def get_service(file_path: str):
+    try:
+        return PlotService(file_path)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
 @router.get("/scatter_plot", status_code=status.HTTP_200_OK)
 @limiter.limit("20/minute")
 async def scatter_plot(
@@ -32,8 +37,8 @@ async def scatter_plot(
         feature1: str = Depends(common_feature1),
         feature2: str = Depends(common_feature2)
 ):
-    scatter_plot_data = service.get_scatter_plot_data_service(csv_file, feature1, feature2)
-    return scatter_plot_data
+    service = await get_service(csv_file)
+    return await service.get_scatter_plot_data_service(feature1, feature2)
 
 
 @router.get("/histogram_plot", status_code=status.HTTP_200_OK)
@@ -42,8 +47,8 @@ async def histogram_plot(
         request: Request,
         csv_file: str = Depends(common_csv_file)
 ):
-    histogram_plot_data = service.get_histogram_plot_data_service(csv_file)
-    return histogram_plot_data
+    service = await get_service(csv_file)
+    return await service.get_histogram_plot_data_service()
 
 
 @router.get("/line_plot", status_code=status.HTTP_200_OK)
@@ -52,8 +57,8 @@ async def line_plot(
         request: Request,
         csv_file: str = Depends(common_csv_file)
 ):
-    line_plot_data = service.get_line_plot_data_service(csv_file)
-    return line_plot_data
+    service = await get_service(csv_file)
+    return await service.get_line_plot_data_service()
 
 
 @router.get("/correlation_matrix", status_code=status.HTTP_200_OK)
@@ -62,8 +67,8 @@ async def correlation_matrix(
         request: Request,
         csv_file: str = Depends(common_csv_file)
 ):
-    correlation_matrix_data = service.get_correlation_matrix_data_service(csv_file)
-    return correlation_matrix_data
+    service = await get_service(csv_file)
+    return await service.get_correlation_matrix_data_service()
 
 
 @router.get("/box_plot", status_code=status.HTTP_200_OK)
@@ -73,8 +78,8 @@ async def box_plot(
         csv_file: str = Depends(common_csv_file),
         feature1: str = Depends(common_feature1),
 ):
-    box_plot_data = service.get_box_plot_data_service(csv_file, feature1)
-    return box_plot_data
+    service = await get_service(csv_file)
+    return await service.get_box_plot_data_service(feature1)
 
 
 @router.get("/pair_plot", status_code=status.HTTP_200_OK)
@@ -83,8 +88,8 @@ async def pair_plot(
         request: Request,
         csv_file: str = Depends(common_csv_file)
 ):
-    pair_plot_data = service.get_pair_plot_data_service(csv_file)
-    return pair_plot_data
+    service = await get_service(csv_file)
+    return await service.get_pair_plot_data_service()
 
 
 @router.get("/area_plot", status_code=status.HTTP_200_OK)
@@ -94,5 +99,5 @@ async def area_plot(
         csv_file: str = Depends(common_csv_file),
         feature1: str = Depends(common_feature1),
 ):
-    area_plot_data = service.get_area_plot_data_service(csv_file, feature1)
-    return area_plot_data
+    service = await get_service(csv_file)
+    return await service.get_area_plot_data_service(feature1)

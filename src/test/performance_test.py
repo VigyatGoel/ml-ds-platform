@@ -1,9 +1,9 @@
-import asyncio
-import httpx
 import time
 
-BASE_URL = "http://localhost:8000/data_summary"  # Change this to match your API's URL
-CSV_FILE_PARAM = {"csv_file": "/Users/vigyatgoel/Desktop/Personal_Projects/MachineLearning_Platform/Machine_learning_platform/src/csvfiles/train.csv"}  # Adjust as needed
+import httpx
+
+BASE_URL = "https://140.238.255.45/data_summary"
+CSV_FILE_PARAM = {"csv_file": "/app/src/csvfiles/train.csv"}
 
 ENDPOINTS = [
     "/file_info",
@@ -18,28 +18,30 @@ ENDPOINTS = [
 ALL_STATS_ENDPOINT = "/all_stats"
 
 
-async def measure_time():
-    async with httpx.AsyncClient() as client:
-        # Measure time for individual requests
+def measure_time():
+    with httpx.Client(verify=False, timeout=10) as client:
         start_time = time.time()
-        responses = await asyncio.gather(
-            *[client.get(f"{BASE_URL}{endpoint}", params=CSV_FILE_PARAM) for endpoint in ENDPOINTS])
+        responses = []
+        for endpoint in ENDPOINTS:
+            response = client.get(f"{BASE_URL}{endpoint}", params=CSV_FILE_PARAM)
+            responses.append(response)
         end_time = time.time()
         individual_time = end_time - start_time
 
-        # Ensure all responses are successful
+        for response in responses:
+            if response.status_code != 200:
+                print(f"Request to {response.url} failed with status code {response.status_code}")
+
         if all(response.status_code == 200 for response in responses):
             print("All individual requests were successful.")
         else:
             print("Some individual requests failed.")
 
-        # Measure time for all_stats request
         start_time = time.time()
-        response = await client.get(f"{BASE_URL}{ALL_STATS_ENDPOINT}", params=CSV_FILE_PARAM)
+        response = client.get(f"{BASE_URL}{ALL_STATS_ENDPOINT}", params=CSV_FILE_PARAM)
         end_time = time.time()
         all_stats_time = end_time - start_time
 
-        # Ensure response is successful
         if response.status_code == 200:
             print("All stats request was successful.")
         else:
@@ -55,4 +57,4 @@ async def measure_time():
 
 
 if __name__ == "__main__":
-    asyncio.run(measure_time())
+    measure_time()

@@ -4,7 +4,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from .endpoints import data_science, csv_file, machine_learning, data_summary
+from .endpoints import data_science, csv_file, machine_learning, data_summary, api_key
 
 app = FastAPI()
 limiter = Limiter(key_func=get_remote_address)
@@ -25,6 +25,7 @@ app.include_router(data_science.router, prefix="/data_science", tags=["Data Scie
 app.include_router(csv_file.router, prefix="/csv_file", tags=["CSV File"])
 app.include_router(machine_learning.router, prefix="/machine_learning", tags=["Machine Learning"])
 app.include_router(data_summary.router, prefix="/data_summary", tags=["Data Summary"])
+app.include_router(api_key.router, prefix="/api", tags=["API Key"])
 
 
 @app.get("/", status_code=status.HTTP_200_OK)
