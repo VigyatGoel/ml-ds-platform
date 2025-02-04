@@ -59,3 +59,29 @@ class DataSummaryService:
             "missing_values": missing_values.to_dict(),
             "missing_percentage": missing_percentage.round(4).to_dict(),
         }
+
+    @handle_exceptions
+    async def get_all_stats_service(self):
+        (
+            file_info,
+            row_col,
+            null_vals,
+            description,
+            info,
+            data_types,
+            cat_counts,
+        ) = await self.data_summary.get_all_stats()
+
+        result = {
+            "file_info": {"name": file_info[0], "size_mb": file_info[1]},
+            "rows_columns": {"rows": row_col[0], "columns": row_col[1]},
+            "missing_values": {
+                "count": null_vals[0].fillna(0).astype(int).to_dict(),
+                "percentage": null_vals[1].fillna(0).round(4).to_dict(),
+            },
+            "data_description": description,
+            "data_info": info,
+            "data_types": data_types.astype(str).to_dict(),
+            "categorical_column_counts": cat_counts.fillna("none").to_dict(),
+        }
+        return result

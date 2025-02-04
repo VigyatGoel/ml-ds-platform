@@ -89,3 +89,13 @@ async def null_values(
 ):
     service = await get_service(csv_file)
     return await service.get_null_val_count_service()
+
+
+@router.get("/all_stats", status_code=status.HTTP_200_OK)
+@limiter.limit("20/minute")
+async def all_stats(
+        request: Request,
+        csv_file: str = Depends(common_csv_file)
+):
+    service = await get_service(csv_file)
+    return await service.get_all_stats_service()

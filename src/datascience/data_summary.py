@@ -13,7 +13,7 @@ class DataSummary:
 
         self.file_path = file_path
         self._df = None
-        self.executor = ThreadPoolExecutor()
+        self.executor = ThreadPoolExecutor(max_workers=4)
 
     async def load_data(self, force_reload=False):
         if self._df is None or force_reload:
@@ -50,21 +50,27 @@ class DataSummary:
 
     @staticmethod
     def _get_categorical_columns_count(df):
-        categorical_cols = df.select_dtypes(include=["object", "category"])
-        result = categorical_cols.apply(pd.Series.value_counts)
-        return result.fillna("none")
+        return df.select_dtypes(include=["object", "category"]).apply(pd.Series.value_counts).fillna("none")
 
     async def get_categorical_columns_count(self):
         return await self.execute_parallel(self._get_categorical_columns_count, await self.get_df())
 
     async def get_row_col_count(self):
         df = await self.get_df()
-        rows = df.shape[0]
-        cols = df.shape[1]
-        return rows, cols
+        return await asyncio.to_thread(lambda: df.shape)
 
     async def get_null_val_count(self):
         df = await self.get_df()
         missing_values = df.isnull().sum()
-        missing_percentage = (missing_values / len(df)) * 100
-        return missing_values, missing_percentage
+        return missing_values, (missing_values / len(df)) * 100
+
+    async def get_all_stats(self):
+        return await asyncio.gather(
+            self.get_file_info(),
+            self.get_row_col_count(),
+            self.get_null_val_count(),
+            self.get_data_description(),
+            self.get_data_info(),
+            self.get_data_types(),
+            self.get_categorical_columns_count()
+        )

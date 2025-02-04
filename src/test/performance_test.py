@@ -1,31 +1,58 @@
 import asyncio
+import httpx
 import time
 
-import httpx
+BASE_URL = "http://localhost:8000/data_summary"  # Change this to match your API's URL
+CSV_FILE_PARAM = {"csv_file": "/Users/vigyatgoel/Desktop/Personal_Projects/MachineLearning_Platform/Machine_learning_platform/src/csvfiles/train.csv"}  # Adjust as needed
+
+ENDPOINTS = [
+    "/file_info",
+    "/data_description",
+    "/data_info",
+    "/data_types",
+    "/categorical_columns_count",
+    "/row_col_count",
+    "/null_value_count",
+]
+
+ALL_STATS_ENDPOINT = "/all_stats"
 
 
-async def send_requests(client, url):
-    # Send a single HTTP GET request
-    response = await client.get(url)
-    return response.status_code
+async def measure_time():
+    async with httpx.AsyncClient() as client:
+        # Measure time for individual requests
+        start_time = time.time()
+        responses = await asyncio.gather(
+            *[client.get(f"{BASE_URL}{endpoint}", params=CSV_FILE_PARAM) for endpoint in ENDPOINTS])
+        end_time = time.time()
+        individual_time = end_time - start_time
+
+        # Ensure all responses are successful
+        if all(response.status_code == 200 for response in responses):
+            print("All individual requests were successful.")
+        else:
+            print("Some individual requests failed.")
+
+        # Measure time for all_stats request
+        start_time = time.time()
+        response = await client.get(f"{BASE_URL}{ALL_STATS_ENDPOINT}", params=CSV_FILE_PARAM)
+        end_time = time.time()
+        all_stats_time = end_time - start_time
+
+        # Ensure response is successful
+        if response.status_code == 200:
+            print("All stats request was successful.")
+        else:
+            print("All stats request failed.")
+
+        print(f"Total time for individual requests: {individual_time:.4f} seconds")
+        print(f"Time for /all_stats request: {all_stats_time:.4f} seconds")
+
+        if all_stats_time < individual_time:
+            print("/all_stats is more optimized than separate requests.")
+        else:
+            print("Separate requests are faster or equal to /all_stats.")
 
 
-async def simulate_load(url, num_requests=100):
-    async with httpx.AsyncClient(verify=False) as client:
-        tasks = [send_requests(client, url) for _ in range(num_requests)]
-        responses = await asyncio.gather(*tasks)
-
-        # Print the status codes of the responses
-        for response in responses:
-            print(response)  # You can modify this to log or process responses
-
-
-# URL of your FastAPI app
-url = "https://140.238.255.45/data_science/correlation_matrix?csv_file=../datascience/plots/iris.csv"
-
-# Start the simulation with 100 concurrent requests
-start_time = time.time()
-asyncio.run(simulate_load(url, num_requests=10))
-end_time = time.time()
-
-print(f"Completed 10 requests in {end_time - start_time:.2f} seconds")
+if __name__ == "__main__":
+    asyncio.run(measure_time())
