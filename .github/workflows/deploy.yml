@@ -33,9 +33,8 @@ jobs:
           git fetch origin
           git reset --hard origin/main
           git pull origin main
-          sudo docker build -t vigyaan-image:latest .
-          sudo docker stop vigyaan-container || true
-          sudo docker rm vigyaan-container || true
-          sudo docker run -d --name vigyaan-container -p 8000:8000 --restart unless-stopped vigyaan-image:latest
+        
+          sudo docker-compose down
+          sudo docker-compose up --build -d
           sudo docker image prune -f
         EOF

@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -5,8 +7,19 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from .routes import data_science, csv_file, machine_learning, data_summary, api_key
+from ..service.database.database_service import DatabaseService, engine
 
-app = FastAPI()
+db_service = DatabaseService()
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    await db_service.init_db()
+    yield
+    await engine.dispose()
+
+
+app = FastAPI(lifespan=lifespan)
 limiter = Limiter(key_func=get_remote_address)
 
 app.state.limiter = limiter
@@ -41,14 +54,5 @@ async def read_root(request: Request):
 @limiter.limit("20/minute")
 async def health_check(request: Request):
     return {
-        "status": "healthy",
-        "message": "API is running successfully",
-    }
-
-
-@app.get("/help", status_code=status.HTTP_200_OK)
-@limiter.limit("20/minute")
-async def help(request: Request):
-    return {
-        "message": "API is working properly!"
+        "status": "healthy"
     }
