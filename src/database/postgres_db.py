@@ -1,12 +1,20 @@
 import asyncio
 import os
+import ssl
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_scoped_session
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+asyncpg://myuser:mypassword@postgres/apikeys_db")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+# Create an SSL context
+ssl_context = ssl.create_default_context(cafile="./ca.pem")
+
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=True,
+    connect_args={"ssl": ssl_context},
+)
 
 SessionLocal = async_scoped_session(
     sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False),

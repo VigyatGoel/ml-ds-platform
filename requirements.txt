@@ -5,6 +5,4 @@ fastapi[standard]
 scikit-learn
 slowapi
 sqlalchemy
-passlib
 asyncpg
-bcrypt

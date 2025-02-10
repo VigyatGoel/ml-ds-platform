@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from sqlalchemy import text
 
 from ...database.crud import is_valid_api_key, create_api_key, delete_api_key
 from ...database.postgres_db import Base, engine, get_db
@@ -9,7 +10,14 @@ class DatabaseService:
     @staticmethod
     async def init_db():
         async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+            result = await conn.execute(text("SELECT to_regclass('public.api_keys')"))
+            table_exists = result.scalar() is not None
+
+            if not table_exists:
+                print("No tables found, creating tables...")
+                await conn.run_sync(Base.metadata.create_all)
+            else:
+                print("Tables already exist, skipping creation.")
 
     @staticmethod
     async def verify_api_key_service(db, api_key):
