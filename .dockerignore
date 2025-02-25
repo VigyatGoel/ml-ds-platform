@@ -1,15 +1,30 @@
-# Exclude unnecessary files and directories
+# Exclude version control directories
 .git
 .github
+
+# Exclude Python cache and build files
 *.egg-info
 *.pyc
+*.pyo
 __pycache__/
+
+# Exclude environment files
+*.env
+
+# Exclude OS-specific files
+.DS_Store
+
+# Exclude IDE/editor specific files
+.idea/
+.vscode/
+
+# Exclude documentation files
 README.md
+
+# Exclude Docker-related files
 Dockerfile
 docker-compose.yml
-__pycache__
-*.pyo
-*.env
-.DS_Store
-.idea
-.idea/
+
+# Exclude logs and temporary files
+*.log
+*.tmp

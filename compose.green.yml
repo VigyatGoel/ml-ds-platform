@@ -1,12 +1,12 @@
 services:
   fastapi_app:
     build: .
-    container_name: vigyaan-container
+    container_name: vigyaan-container-green
     image: vigyaan-image
     restart: always
     env_file:
       - .env
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
       - .:/app

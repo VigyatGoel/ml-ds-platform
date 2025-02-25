@@ -14,31 +14,47 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-
     - name: Install SSH agent and add private key
       uses: webfactory/ssh-agent@v0.9.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-
     - name: Add known hosts
       run: |
         echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
 
-
     - name: Deploy application
       run: |
         ssh ubuntu@${{ secrets.VM_IP }} << EOF
+          set -e
           cd /home/ubuntu/Machine-Learning-and-Data-Science-Platform
           sudo mv .env /tmp/env_backup
-        
+
           git fetch origin
           git reset --hard origin/main
           git pull origin main
-        
+
           sudo mv /tmp/env_backup .env
-        
-          docker compose down
-          docker compose up --build -d
+
+          docker compose -f docker-compose.green.yml up --build -d
+
+          for i in {1..10}; do
+            if [ "$(docker inspect -f {{.State.Health.Status}} vigyaan-container-green)" == "healthy" ]; then
+              break
+            fi
+            sleep 10
+          done
+
+          if [ "$(docker inspect -f {{.State.Health.Status}} vigyaan-container-green)" != "healthy" ]; then
+            echo "Green container is not healthy after waiting, rolling back to blue environment."
+            docker compose -f docker-compose.green.yml down
+            docker compose -f docker-compose.blue.yml up --build -d
+            exit 1
+          fi
+
+          docker network connect my_network vigyaan-container-green
+          docker network disconnect my_network vigyaan-container-blue
+
+          docker compose -f docker-compose.blue.yml down
           docker image prune -f
         EOF
