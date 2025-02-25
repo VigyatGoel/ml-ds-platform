@@ -35,6 +35,8 @@ jobs:
           git pull origin main
 
           sudo mv /tmp/env_backup .env
+          
+          docker network create my_network || true
 
           docker compose -f compose.green.yml up --build -d
 
