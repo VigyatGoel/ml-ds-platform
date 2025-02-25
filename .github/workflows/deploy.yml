@@ -35,7 +35,7 @@ jobs:
 
           sudo mv /tmp/env_backup .env
 
-          docker compose -f docker-compose.green.yml up --build -d
+          docker compose -f compose.green.yml up --build -d
 
           for i in {1..10}; do
             if [ "$(docker inspect -f {{.State.Health.Status}} vigyaan-container-green)" == "healthy" ]; then
@@ -46,14 +46,14 @@ jobs:
 
           if [ "$(docker inspect -f {{.State.Health.Status}} vigyaan-container-green)" != "healthy" ]; then
             echo "Green container is not healthy after waiting, rolling back to blue environment."
-            docker compose -f docker-compose.green.yml down
-            docker compose -f docker-compose.blue.yml up --build -d
+            docker compose -f compose.green.yml down
+            docker compose -f compose.blue.yml up --build -d
             exit 1
           fi
 
           docker network connect my_network vigyaan-container-green
           docker network disconnect my_network vigyaan-container-blue
 
-          docker compose -f docker-compose.blue.yml down
+          docker compose -f compose.blue.yml down
           docker image prune -f
         EOF
