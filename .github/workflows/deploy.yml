@@ -35,14 +35,21 @@ jobs:
           git pull origin main
 
           sudo mv /tmp/env_backup .env
-          
+
           docker network create my_network || true
+
+          if [ "$(docker ps -q -f name=vigyaan-container-green)" ]; then
+            docker rename vigyaan-container-green vigyaan-container-blue
+          fi
 
           docker compose -f compose.green.yml up --build -d
 
           docker network connect my_network vigyaan-container-green
-          docker network disconnect my_network vigyaan-container-blue
 
-          docker compose -f compose.blue.yml down
+          if [ "$(docker ps -q -f name=vigyaan-container-blue)" ]; then
+            docker network disconnect my_network vigyaan-container-blue
+            docker compose -f compose.blue.yml down
+          fi
+
           docker image prune -f
         EOF
