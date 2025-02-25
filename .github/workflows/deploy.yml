@@ -26,7 +26,6 @@ jobs:
     - name: Deploy application
       run: |
         ssh ubuntu@${{ secrets.VM_IP }} << EOF
-          set -e
           cd /home/ubuntu/Machine-Learning-and-Data-Science-Platform
           sudo mv .env /tmp/env_backup
 
