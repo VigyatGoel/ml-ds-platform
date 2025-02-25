@@ -14,14 +14,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+
     - name: Install SSH agent and add private key
       uses: webfactory/ssh-agent@v0.9.0
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+
     - name: Add known hosts
       run: |
         echo "${{ secrets.KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+
 
     - name: Deploy application
       run: |
@@ -29,27 +32,14 @@ jobs:
           set -e
           cd /home/ubuntu/Machine-Learning-and-Data-Science-Platform
           sudo mv .env /tmp/env_backup
-
+        
           git fetch origin
           git reset --hard origin/main
           git pull origin main
-
+        
           sudo mv /tmp/env_backup .env
-
-          docker network create my_network || true
-
-          if [ "$(docker ps -q -f name=vigyaan-container-green)" ]; then
-            docker rename vigyaan-container-green vigyaan-container-blue
-          fi
-
-          docker compose -f compose.green.yml up --build -d
-
-          docker network connect my_network vigyaan-container-green
-
-          if [ "$(docker ps -q -f name=vigyaan-container-blue)" ]; then
-            docker network disconnect my_network vigyaan-container-blue
-            docker compose -f compose.blue.yml down
-          fi
-
+        
+          docker compose down
+          docker compose up --build -d
           docker image prune -f
         EOF
