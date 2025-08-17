@@ -22,7 +22,6 @@ RUN pip install --upgrade pip && \
 # Copy source code
 COPY src /app/src
 COPY streamlit_frontend /app/streamlit_frontend
-COPY models /app/models
 COPY run_all.sh /app/run_all.sh
 
 RUN chmod +x /app/run_all.sh && mkdir -p /app/uploads /app/src/csvfiles
