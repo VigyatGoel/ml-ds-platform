@@ -1,6 +1,6 @@
-# Machine Learning & Data Science Platform
+# Vigyaan
 
-Unified Streamlit + FastAPI application for rapid exploratory data analysis, visualization, and baseline machine learning model training (Logistic Regression, SVC, RandomForest) with downloadable trained artifacts and preprocessing pipeline.
+Vigyaan is an all-in-one Streamlit + FastAPI application for rapid exploratory data analysis, interactive visualizations, and baseline machine learning model training (Logistic Regression, SVC, RandomForest) with downloadable trained artifacts and preprocessing pipeline.
 
 ## ✨ Features
 
@@ -65,8 +65,8 @@ Then open: http://localhost:8501
 ## 🐳 Docker (Single Container)
 
 ```bash
-docker build -t ml-platform .
-docker run -p 8501:8501 ml-platform
+docker build -t vigyaan .
+docker run -p 8501:8501 vigyaan
 ```
 
 Open: http://localhost:8501
