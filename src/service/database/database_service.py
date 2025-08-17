@@ -6,7 +6,6 @@ from ...database.postgres_db import Base, engine, get_db
 
 
 class DatabaseService:
-
     @staticmethod
     async def init_db():
         async with engine.begin() as conn:

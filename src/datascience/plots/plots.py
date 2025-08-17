@@ -31,7 +31,9 @@ class Plot:
         return df[[feature1, feature2]]
 
     async def get_scatter_plot_data(self, feature1, feature2):
-        return await self.execute_parallel(self._scatter_plot, await self.get_df(), feature1, feature2)
+        return await self.execute_parallel(
+            self._scatter_plot, await self.get_df(), feature1, feature2
+        )
 
     @staticmethod
     def _histogram_plot(df):
@@ -52,14 +54,18 @@ class Plot:
         return df.select_dtypes(include=["number"]).corr()
 
     async def get_correlation_matrix_data(self):
-        return await self.execute_parallel(self._correlation_matrix, await self.get_df())
+        return await self.execute_parallel(
+            self._correlation_matrix, await self.get_df()
+        )
 
     @staticmethod
     def _single_box_plot(df, feature1):
         return df[feature1]
 
     async def get_box_plot_data(self, feature1):
-        return await self.execute_parallel(self._single_box_plot, await self.get_df(), feature1)
+        return await self.execute_parallel(
+            self._single_box_plot, await self.get_df(), feature1
+        )
 
     @staticmethod
     def _pair_plot(df):
@@ -73,4 +79,6 @@ class Plot:
         return df[feature1]
 
     async def get_area_plot_data(self, feature1):
-        return await self.execute_parallel(self._area_plot, await self.get_df(), feature1)
+        return await self.execute_parallel(
+            self._area_plot, await self.get_df(), feature1
+        )

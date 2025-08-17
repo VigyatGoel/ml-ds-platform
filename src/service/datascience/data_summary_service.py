@@ -54,7 +54,10 @@ class DataSummaryService:
 
     @handle_exceptions
     async def get_null_val_count_service(self):
-        missing_values, missing_percentage = await self.data_summary.get_null_val_count()
+        (
+            missing_values,
+            missing_percentage,
+        ) = await self.data_summary.get_null_val_count()
         return {
             "missing_values": missing_values.to_dict(),
             "missing_percentage": missing_percentage.round(4).to_dict(),

@@ -7,3 +7,7 @@ __pycache__/
 .idea/
 .env
 ca.pem
+
+.venv
+
+.ruff_cache

@@ -1,17 +1,14 @@
-import pickle
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, Form
 from fastapi.responses import JSONResponse, FileResponse
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder
-from sklearn.svm import SVC
+import pandas as pd
+import json
+
+from ...machinelearning.main_train_flow import train_pipeline, predict_pipeline
+
+# Import the template content
+# Removed model_load_template import since template download endpoint was removed
 
 router = APIRouter()
 
@@ -20,110 +17,120 @@ def common_csv_file(csv_file: str = Query(..., description="Path to the CSV file
     return csv_file
 
 
-def common_feature1(feature1: str = Query(..., description="First feature for the plot")):
-    return feature1
-
-
-def train_model(csv_file, target_var, save_path='models/'):
-    data = pd.read_csv(csv_file)
-
-    imputer = SimpleImputer(strategy='mean')
-    numeric_cols = data.select_dtypes(include=['float64', 'int64']).columns
-    data[numeric_cols] = imputer.fit_transform(data[numeric_cols])
-
-    for col in data.select_dtypes(include=['object']).columns:
-        if col != target_var:
-            le = LabelEncoder()
-            data[col] = le.fit_transform(data[col])
-
-    X = data.drop(target_var, axis=1)
-    y = data[target_var]
-
-    scaler = StandardScaler()
-    X = scaler.fit_transform(X)
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    models = {
-        'LogisticRegression': LogisticRegression(),
-        'SVC': SVC(probability=True),
-        'RandomForestClassifier': RandomForestClassifier()
-    }
-
-    for model_name, model in models.items():
-        model.fit(X_train, y_train)
-        y_pred = model.predict(X_test)
-        accuracy = accuracy_score(y_test, y_pred)
-        print(f'{model_name} Accuracy: {accuracy:.2f}')
-
-        with open(f'{save_path}{model_name}.pkl', 'wb') as file:
-            pickle.dump(model, file)
-
-    with open(f'{save_path}scaler.pkl', 'wb') as file:
-        pickle.dump(scaler, file)
-
-    with open(f'{save_path}imputer.pkl', 'wb') as file:
-        pickle.dump(imputer, file)
-
-    print('Models, scaler, and imputer saved successfully.')
-
-
-def load_model_and_predict_with_imputation(model_path, scaler_path, imputer_path):
-    with open(model_path, 'rb') as model_file:
-        rfc_model = pickle.load(model_file)
-
-    with open(scaler_path, 'rb') as scaler_file:
-        scaler = pickle.load(scaler_file)
-
-    with open(imputer_path, 'rb') as imputer_file:
-        imputer = pickle.load(imputer_file)
-
-    print("Model, scaler, and imputer loaded successfully.")
-
-    print("Enter the feature values for prediction (type 'nan' for missing values):")
-    input_values = [4.9, 3, 1.4, .2]
-
-    input_values = np.array(input_values).reshape(1, -1)
-
-    input_values_imputed = imputer.transform(input_values)
-
-    input_values_scaled = scaler.transform(input_values_imputed)
-
-    prediction = rfc_model.predict(input_values_scaled)
-    prediction_proba = rfc_model.predict_proba(input_values_scaled)
-
-    print(f"Prediction: {prediction[0]}")
-    print(f"Prediction Probabilities: {prediction_proba[0]}")
+def common_target_var(
+    target_var: str = Query(..., description="Target variable for training"),
+):
+    return target_var
 
 
 MODEL_DIR = Path("models/")
+
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
 
 @router.get("/train")
-async def train(
-        csv_file: str = Depends(common_csv_file),
-        target_var: str = Depends(common_feature1)
+async def train_endpoint(
+    csv_file: str = Depends(common_csv_file),
+    target_var: str = Depends(common_target_var),
 ):
-    train_model(csv_file, target_var)
-    saved_files = [
-        str(MODEL_DIR / "RandomForestClassifier.pkl"),
-        str(MODEL_DIR / "scaler.pkl"),
-        str(MODEL_DIR / "imputer.pkl")
-    ]
+    try:
+        csv_path = Path(csv_file)
 
-    # Return paths to the saved models
-    return JSONResponse(content={"saved_models": saved_files})
+        data = pd.read_csv(csv_path)
+        if target_var not in data.columns:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "error": f"Target variable '{target_var}' not found in CSV columns"
+                },
+            )
+
+        results = train_pipeline(str(csv_path), target_var, str(MODEL_DIR) + "/")
+
+        saved_files = [
+            str("LogisticRegression.pkl"),
+            str("SVC.pkl"),
+            str("RandomForestClassifier.pkl"),
+            str("scaler.pkl"),
+            str("imputer.pkl"),
+            str("feature_names.pkl"),
+        ]
+
+        return JSONResponse(
+            content={
+                "message": "Models trained successfully",
+                "models": results,
+                "saved_files": saved_files,
+            }
+        )
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500, content={"error": f"Error during training: {str(e)}"}
+        )
 
 
 @router.get("/download")
-def download_model(model_name: str = Query(..., description="Name of model")):
-    """
-    Endpoint to download a specific model by name.
-    """
+def download_model(
+    model_name: str = Query(..., description="Name of model file to download"),
+):
     file_path = MODEL_DIR / model_name
 
     if file_path.exists():
-        return FileResponse(path=file_path, filename=model_name, media_type='application/octet-stream')
+        return FileResponse(
+            path=file_path, filename=model_name, media_type="application/octet-stream"
+        )
     else:
-        return {"error": f"Model '{model_name}' not found!"}
+        return JSONResponse(
+            status_code=404, content={"error": f"File '{model_name}' not found!"}
+        )
+
+
+@router.post("/predict")  # Add the route decorator that was missing
+async def predict_endpoint(
+    model_name: str = Form("RandomForestClassifier"),
+    features: str = Form(...),  # JSON string of feature values
+):
+    """
+    Make predictions using a trained model
+
+    Args:
+        model_name: Name of the model to use (without .pkl extension)
+        features: JSON string of features in format [val1, val2, ...]
+    """
+    try:
+        feature_values = json.loads(features)
+
+        if not isinstance(feature_values, list):
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Features must be provided as a JSON array"},
+            )
+
+        model_path = MODEL_DIR / f"{model_name}.pkl"
+        if not model_path.exists():
+            return JSONResponse(
+                status_code=404, content={"error": f"Model {model_name} not found"}
+            )
+
+        input_dict = {f"feature_{i}": val for i, val in enumerate(feature_values)}
+
+        # Use predict_pipeline from main_train_flow
+        prediction_result = predict_pipeline(
+            input_data=input_dict, model_name=model_name, save_path=str(MODEL_DIR) + "/"
+        )
+
+        return JSONResponse(
+            content={
+                "prediction": prediction_result["prediction"],
+                "probabilities": prediction_result["probabilities"].tolist()
+                if hasattr(prediction_result["probabilities"], "tolist")
+                else prediction_result["probabilities"],
+                "model_used": model_name,
+            }
+        )
+
+    except Exception as e:
+        return JSONResponse(
+            status_code=500, content={"error": f"Error during prediction: {str(e)}"}
+        )

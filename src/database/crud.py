@@ -24,9 +24,13 @@ async def list_api_keys(db: AsyncSession):
 
 
 async def is_valid_api_key(db: AsyncSession, api_key: str) -> bool:
-    result = await db.execute(select(APIKey).where(APIKey.expires_at >= datetime.now(UTC)))  # Select full object
+    result = await db.execute(
+        select(APIKey).where(APIKey.expires_at >= datetime.now(UTC))
+    )  # Select full object
     for key_entry in result.scalars():  # key_entry is now an APIKey object
-        if await APIKey.verify_api_key(api_key, key_entry.key_hash):  # Now correctly accesses key_hash
+        if await APIKey.verify_api_key(
+            api_key, key_entry.key_hash
+        ):  # Now correctly accesses key_hash
             return True
     return False
 

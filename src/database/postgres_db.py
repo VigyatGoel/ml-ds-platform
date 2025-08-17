@@ -2,7 +2,11 @@ import asyncio
 import os
 import ssl
 
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_scoped_session
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    create_async_engine,
+    async_scoped_session,
+)
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 DATABASE_URL = os.getenv("DATABASE_URL")

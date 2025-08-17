@@ -30,7 +30,9 @@ def measure_time():
 
         for response in responses:
             if response.status_code != 200:
-                print(f"Request to {response.url} failed with status code {response.status_code}")
+                print(
+                    f"Request to {response.url} failed with status code {response.status_code}"
+                )
 
         if all(response.status_code == 200 for response in responses):
             print("All individual requests were successful.")

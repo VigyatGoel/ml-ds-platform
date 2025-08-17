@@ -41,7 +41,10 @@ class PlotService:
     async def get_correlation_matrix_data_service(self):
         correlation_matrix_data = await self.plot.get_correlation_matrix_data()
         if correlation_matrix_data.empty:
-            raise HTTPException(status_code=422, detail="No numeric columns available to calculate correlation.")
+            raise HTTPException(
+                status_code=422,
+                detail="No numeric columns available to calculate correlation.",
+            )
         return correlation_matrix_data.round(4).to_dict(orient="list")
 
     @handle_exceptions

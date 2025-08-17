@@ -28,7 +28,9 @@ class DataSummary:
         return await asyncio.to_thread(func, df)
 
     async def get_file_info(self):
-        return os.path.basename(self.file_path), round(os.path.getsize(self.file_path) / (1024 * 1024), 4)
+        return os.path.basename(self.file_path), round(
+            os.path.getsize(self.file_path) / (1024 * 1024), 4
+        )
 
     async def get_data_description(self):
         df = await self.get_df()
@@ -50,10 +52,16 @@ class DataSummary:
 
     @staticmethod
     def _get_categorical_columns_count(df):
-        return df.select_dtypes(include=["object", "category"]).apply(pd.Series.value_counts).fillna("none")
+        return (
+            df.select_dtypes(include=["object", "category"])
+            .apply(pd.Series.value_counts)
+            .fillna("none")
+        )
 
     async def get_categorical_columns_count(self):
-        return await self.execute_parallel(self._get_categorical_columns_count, await self.get_df())
+        return await self.execute_parallel(
+            self._get_categorical_columns_count, await self.get_df()
+        )
 
     async def get_row_col_count(self):
         df = await self.get_df()
@@ -72,5 +80,5 @@ class DataSummary:
             self.get_data_description(),
             self.get_data_info(),
             self.get_data_types(),
-            self.get_categorical_columns_count()
+            self.get_categorical_columns_count(),
         )

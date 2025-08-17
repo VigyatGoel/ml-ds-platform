@@ -27,4 +27,6 @@ class APIKey(Base):
         """Asynchronously verify if the API key matches the stored hash"""
         # Await asyncio.to_thread to get the hex digest and then compare
         calculated_hash = await asyncio.to_thread(hashlib.sha256, api_key.encode())
-        return await asyncio.to_thread(lambda: calculated_hash.hexdigest() == hashed_key.lower())
+        return await asyncio.to_thread(
+            lambda: calculated_hash.hexdigest() == hashed_key.lower()
+        )
