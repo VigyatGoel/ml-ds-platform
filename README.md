@@ -1,6 +1,6 @@
 # Vigyaan
 
-Vigyaan is an all-in-one Streamlit + FastAPI application for rapid exploratory data analysis, interactive visualizations, and baseline machine learning model training (Logistic Regression, SVC, RandomForest) with downloadable trained artifacts and preprocessing pipeline.
+Vigyaan is an all-in-one application for rapid exploratory data analysis, interactive visualizations, and baseline machine learning model training (Logistic Regression, SVC, RandomForest) with downloadable trained artifacts and preprocessing pipeline. It is built using Streamlit + FastAPI.
 
 ## ✨ Features
 
@@ -33,7 +33,7 @@ Vigyaan is an all-in-one Streamlit + FastAPI application for rapid exploratory d
 
 - Both processes started by `run_all.sh`
 - FastAPI bound to 127.0.0.1 (`BACKEND_PORT`, default 8000) and NOT exposed externally
-- Streamlit exposed on `$PORT` (Cloud Run) or 8501 locally
+- Streamlit exposed on `$PORT` or 8501 locally
 - Models + preprocessing artifacts stored in `/app/models`
 
 ## 📂 Project Structure (key paths)
@@ -188,4 +188,3 @@ Licensed under the MIT License. See `LICENSE` file for full text.
 
 ---
 Happy experimenting! 🚀
-
